@@ -1,8 +1,8 @@
-const path = require("path");
+import path from "path";
 
-module.exports = {
+export default {
   target: "node",
-  mode: "production",
+  mode: "development",
   // 모드 production시 (default) devtool: "source-map",
   //devtool: false,
   entry: path.resolve("src/app.ts"),

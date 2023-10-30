@@ -9,4 +9,4 @@
 
 # publish
 tsconfig.json
-webpack.config.json
+webpack.config.js
