@@ -1,0 +1,12 @@
+# vscode
+.vscode
+
+# dependencies
+/node_modules
+
+# github
+.git
+
+# publish
+tsconfig.json
+webpack.config.json
