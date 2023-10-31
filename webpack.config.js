@@ -1,6 +1,6 @@
-import path from "path";
+const path = require("path");
 
-export default {
+module.exports = {
   target: "node",
   mode: "development",
   // 모드 production시 (default) devtool: "source-map",
