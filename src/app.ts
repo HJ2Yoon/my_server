@@ -10,8 +10,14 @@ app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
-app.get("/", () => {
-  console.log("/");
+app.get("/report", (req: Request, res: Response) => {
+  res.send(`Current clients: ${clients.size}`);
+});
+
+app.get("/change", (req: Request, res: Response) => {
+  const message = req.query.message as string;
+  sendEvent({ message });
+  res.end();
 });
 
 app.get("/sse", (req: Request, res: Response) => {
@@ -20,8 +26,10 @@ app.get("/sse", (req: Request, res: Response) => {
     res.setHeader("Content-Type", "text/event-stream");
     res.setHeader("Cache-Control", "no-cache");
     res.setHeader("Connection", "keep-alive");
+    res.setHeader("Access-Control-Allow-Origin", "*");
+
     clients.set(ip, res);
-    console.log(`🖐Client connected ${ip}`);
+    console.log(`🖐 Client connected ${ip}`);
 
     req.on("close", () => {
       clients.delete(ip);
@@ -36,6 +44,6 @@ app.get("/sse", (req: Request, res: Response) => {
 
 const sendEvent = (data: { [key: string]: string }) => {
   clients.forEach((client) => {
-    client.json(data);
+    client.write(`data: ${JSON.stringify(data)}\n\n`);
   });
 };

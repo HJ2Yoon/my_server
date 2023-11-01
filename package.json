@@ -15,6 +15,6 @@
   },
   "scripts": {
     "start": "node app.js",
-    "build": "webpack --config webpack.config.js"
+    "test": "webpack --config webpack.config.js && node app.js"
   }
 }
