@@ -10,7 +10,16 @@ app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
-app.use(cors());
+const whiteList: string[] = [
+  "http://localhost:3000",
+  "chrome-extension://dnpempifoogikjillgmoplmfihiehhff",
+];
+
+app.use(
+  cors({
+    origin: whiteList,
+  })
+);
 
 app.get("/report", (req: Request, res: Response) => {
   res.send(`Current clients: ${clients.size}`);
