@@ -10,16 +10,9 @@ app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
 
-const whiteList: string[] = [
-  "http://localhost:3000",
-  "chrome-extension://dnpempifoogikjillgmoplmfihiehhff",
-];
+// const whiteList: string[] = [];
 
-app.use(
-  cors({
-    origin: whiteList,
-  })
-);
+app.use(cors());
 
 app.get("/report", (req: Request, res: Response) => {
   res.send(`Current clients: ${clients.size}`);
@@ -32,12 +25,12 @@ app.get("/change", (req: Request, res: Response) => {
 });
 
 app.get("/sse", (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "text/event-stream");
+  res.setHeader("Cache-Control", "no-cache");
+  res.setHeader("Connection", "keep-alive");
+
   const ip = getClientIp(req) ?? "not-found";
   if (!clients.has(ip)) {
-    res.setHeader("Content-Type", "text/event-stream");
-    res.setHeader("Cache-Control", "no-cache");
-    res.setHeader("Connection", "keep-alive");
-
     clients.set(ip, res);
     console.log(`🖐 Client connected ${ip}`);
 
