@@ -40,8 +40,9 @@ app.get("/sse", (req: Request, res: Response) => {
       return res.end();
     });
   } else {
-    console.log("❌Connected client is already exist");
-    return res.end();
+    res.send(
+      `event: error\ndata: {"error": "❌Connected client is already exist"}\n\n`
+    );
   }
 });
 
