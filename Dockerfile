@@ -1,4 +1,6 @@
 From ubuntu:20.04
+RUN sudo apt update
+RUN sudo apt-get install -y curl
 RUN sudo apt install nodejs npm
 RUN sudo apt-get install -y python3-pip 
 RUN pip3 install awscli 
