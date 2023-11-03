@@ -4,7 +4,7 @@ import { getClientIp } from "request-ip";
 import cors from "cors";
 
 const app = express();
-const port = 3000;
+const port = 8000;
 const clients = new Map<string, Response>();
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "ap-northeast-2" });
 
@@ -17,9 +17,13 @@ app.listen(port, "0.0.0.0", () => {
 app.use(cors());
 
 app.get("/getStream", async (req: Request, res: Response) => {
-  const users = (await docClient.scan({ TableName: "Streamer" }).promise())
-    .Items;
-  res.send(JSON.stringify(users));
+  try {
+    const users = (await docClient.scan({ TableName: "Streamer" }).promise())
+      .Items;
+    res.send(JSON.stringify(users));
+  } catch (err) {
+    console.log(err);
+  }
 });
 
 app.get("/report", (req: Request, res: Response) => {
