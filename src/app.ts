@@ -4,7 +4,7 @@ import { getClientIp } from "request-ip";
 import cors from "cors";
 
 const app = express();
-const port = 8000;
+const port = 3000;
 const clients = new Map<string, Response>();
 const docClient = new AWS.DynamoDB.DocumentClient({ region: "ap-northeast-2" });
 

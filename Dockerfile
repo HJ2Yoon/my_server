@@ -13,5 +13,5 @@ COPY package*.json .
 RUN npm install
 RUN npm i pm2 -g
 COPY . .
-EXPOSE 8000
+EXPOSE 3000
 CMD ["pm2-runtime", "app.js"]
