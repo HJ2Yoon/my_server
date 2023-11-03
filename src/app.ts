@@ -1,10 +1,12 @@
 import express, { Request, Response } from "express";
+import AWS from "aws-sdk";
 import { getClientIp } from "request-ip";
 import cors from "cors";
 
 const app = express();
 const port = 3000;
 const clients = new Map<string, Response>();
+const docClient = new AWS.DynamoDB.DocumentClient({ region: "ap-northeast-2" });
 
 app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
@@ -13,6 +15,12 @@ app.listen(port, "0.0.0.0", () => {
 // const whiteList: string[] = [];
 
 app.use(cors());
+
+app.get("/getStream", async (req: Request, res: Response) => {
+  const users = (await docClient.scan({ TableName: "Streamer" }).promise())
+    .Items;
+  res.send(JSON.stringify(users));
+});
 
 app.get("/report", (req: Request, res: Response) => {
   res.send(`Current clients: ${clients.size}`);
