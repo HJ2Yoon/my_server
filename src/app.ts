@@ -75,7 +75,7 @@ app.get("/change", async (req: Request, res: Response) => {
     headerParams.get("clientId") as string,
     headerParams.get("accessToken") as string
   );
-  console.log(temp);
+  console.log(temp.data.data);
   res.end();
 });
 
