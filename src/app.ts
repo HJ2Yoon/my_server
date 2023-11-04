@@ -69,12 +69,13 @@ app.get("/putStream", async (req: Request, res: Response) => {
 });
 
 app.get("/change", async (req: Request, res: Response) => {
-  const auth = await ssmClient
+  const temp = await ssmClient
     .getParameter({
       Name: "TWITCH_AUTH",
     })
     .promise();
-  res.send(auth);
+
+  res.send(temp.Parameter?.Value?.split(","));
   /*res.send(
     await getTwitchUsers(
       message,
