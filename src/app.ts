@@ -1,7 +1,6 @@
 import express, { Request, Response } from "express";
 import { getClientIp } from "request-ip";
 import cors from "cors";
-import AWS from "aws-sdk";
 import { docClient, twitchAuth } from "../src/aws";
 import { getTwitchUsers } from "../src/api";
 
@@ -27,15 +26,12 @@ app.listen(port, "0.0.0.0", () => {
 app.use(cors());
 
 app.get("/getStream", async (req: Request, res: Response) => {
-  const docClient = new AWS.DynamoDB.DocumentClient({
-    region: "ap-northeast-2",
-  });
   const items = (await docClient.scan({ TableName: "Streamer" }).promise())
     .Items;
   items?.forEach((item) => {
     streamers.set(item.user_name, item);
   });
-  res.send(JSON.stringify(streamers));
+  res.send(items);
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
@@ -72,16 +68,9 @@ app.get("/putStream", async (req: Request, res: Response) => {
   }*/
 });
 
-app.get("/report", (req: Request, res: Response) => {
-  res.send(`Current clients: ${clients.size}`);
-});
-
 app.get("/change", async (req: Request, res: Response) => {
   const message = req.query.message as string;
 
-  res.send(
-    `${headerParams.get("clientId")} / ${headerParams.get("accessToken")}`
-  );
   /*res.send(
     await getTwitchUsers(
       message,
@@ -111,6 +100,10 @@ app.get("/sse", (req: Request, res: Response) => {
       `event: error\ndata: {"error": "❌Connected client is already exist"}\n\n`
     );
   }
+});
+
+app.get("/report", (req: Request, res: Response) => {
+  res.send(`Current clients: ${clients.size}`);
 });
 
 const sendEvent = (data: { [key: string]: string }) => {
