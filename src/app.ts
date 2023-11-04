@@ -31,7 +31,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
   items?.forEach((item) => {
     streamers.set(item.user_name, item);
   });
-  res.send(items);
+  res.send(streamers);
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
@@ -69,8 +69,9 @@ app.get("/putStream", async (req: Request, res: Response) => {
 });
 
 app.get("/change", async (req: Request, res: Response) => {
-  const message = req.query.message as string;
-
+  //const message = req.query.message as string;
+  res.write(headerParams.get("clientId"));
+  res.send(headerParams.get("accessToken"));
   /*res.send(
     await getTwitchUsers(
       message,
