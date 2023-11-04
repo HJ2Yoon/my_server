@@ -12,8 +12,8 @@ const clients = new Map<string, Response>();
 const streamers = new Map<string, { [key: string]: string }>();
 const headerParams = new Map<string, string>();
 
-twitchAuth().then(({ token, auth }) => {
-  if (!token || !auth) return;
+twitchAuth().then(({ auth, token }) => {
+  if (!auth || !token) return;
   headerParams.set("clientId", auth[0]);
   headerParams.set("accessToken", token[0].access_token);
 });
@@ -35,6 +35,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
+  res.send(headerParams.get("clientId"));
   /*const message = req.query.message as string;
   if (!streamers.has(message)) {
     // Search users in twitch
