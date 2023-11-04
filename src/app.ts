@@ -34,7 +34,6 @@ app.get("/getStream", async (req: Request, res: Response) => {
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
-  res.send(headerParams.get("accessToken"));
   /*const message = req.query.message as string;
   if (!streamers.has(message)) {
     // Search users in twitch
@@ -71,13 +70,13 @@ app.get("/putStream", async (req: Request, res: Response) => {
 app.get("/change", async (req: Request, res: Response) => {
   const message = req.query.message as string;
 
-  res.send(
-    await getTwitchUsers(
-      message,
-      headerParams.get("clientId") as string,
-      headerParams.get("accessToken") as string
-    )
+  const temp = await getTwitchUsers(
+    message,
+    headerParams.get("clientId") as string,
+    headerParams.get("accessToken") as string
   );
+  console.log(temp);
+  res.end();
 });
 
 app.get("/sse", (req: Request, res: Response) => {
