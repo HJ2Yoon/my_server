@@ -13,9 +13,8 @@ const streamers = new Map<string, { [key: string]: string }>();
 const headerParams = new Map<string, string>();
 
 twitchAuth().then(({ auth, token }) => {
-  if (!auth || !token) return;
-  headerParams.set("clientId", auth[0]);
-  headerParams.set("accessToken", token[0].access_token);
+  headerParams.set("clientId", auth?.[0] || "");
+  headerParams.set("accessToken", token?.[0].access_token);
 });
 
 app.listen(port, "0.0.0.0", () => {
@@ -70,21 +69,15 @@ app.get("/putStream", async (req: Request, res: Response) => {
 });
 
 app.get("/change", async (req: Request, res: Response) => {
-  await ssmClient
-    .getParameter({
-      Name: "TWITCH_AUTH",
-    })
-    .promise()
-    .then((auth) => {
-      res.send(auth.Parameter?.Value?.split(","));
-    });
-  /*res.send(
+  const message = req.query.message as string;
+
+  res.send(
     await getTwitchUsers(
       message,
       headerParams.get("clientId") as string,
       headerParams.get("accessToken") as string
     )
-  );*/
+  );
 });
 
 app.get("/sse", (req: Request, res: Response) => {
