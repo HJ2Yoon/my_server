@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getClientIp } from "request-ip";
 import cors from "cors";
-import { docClient, ssmClient, twitchAuth } from "../src/aws";
+import { docClient, twitchAuth } from "../src/aws";
 import { getTwitchUsers } from "../src/api";
 
 //#region Server initial
