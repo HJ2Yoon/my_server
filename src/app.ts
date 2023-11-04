@@ -1,7 +1,7 @@
 import express, { Request, Response } from "express";
 import { getClientIp } from "request-ip";
 import cors from "cors";
-import { docClient, twitchAuth } from "../src/aws";
+import { docClient, ssmClient, twitchAuth } from "../src/aws";
 import { getTwitchUsers } from "../src/api";
 
 //#region Server initial
@@ -31,7 +31,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
   items?.forEach((item) => {
     streamers.set(item.user_name, item);
   });
-  res.send(streamers);
+  res.send(items);
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
@@ -69,9 +69,12 @@ app.get("/putStream", async (req: Request, res: Response) => {
 });
 
 app.get("/change", async (req: Request, res: Response) => {
-  //const message = req.query.message as string;
-  res.write(headerParams.get("clientId"));
-  res.send(headerParams.get("accessToken"));
+  const auth = await ssmClient
+    .getParameter({
+      Name: "TWITCH_AUTH",
+    })
+    .promise();
+  res.send(auth);
   /*res.send(
     await getTwitchUsers(
       message,
