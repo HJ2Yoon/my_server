@@ -30,7 +30,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
     const items = (await docClient.scan({ TableName: "Streamer" }).promise())
       .Items;
     items?.forEach((item) => {
-      streamers.set(item.display_name, item);
+      streamers.set(item.user_name, item);
     });
     res.send(streamers);
   } catch (err) {
@@ -79,6 +79,9 @@ app.get("/report", (req: Request, res: Response) => {
 app.get("/change", async (req: Request, res: Response) => {
   const message = req.query.message as string;
 
+  res.write(
+    `${headerParams.get("clientId")} / ${headerParams.get("accessToken")}`
+  );
   res.send(
     await getTwitchUsers(
       message,
