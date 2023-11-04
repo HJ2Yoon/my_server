@@ -1,8 +1,9 @@
 import express, { Request, Response } from "express";
 import { getClientIp } from "request-ip";
 import cors from "cors";
-import { docClient, twitchAuth } from "./aws";
-import { getTwitchUsers } from "./api";
+import AWS from "aws-sdk";
+import { docClient, twitchAuth } from "../src/aws";
+import { getTwitchUsers } from "../src/api";
 
 //#region Server initial
 const app = express();
@@ -26,6 +27,9 @@ app.listen(port, "0.0.0.0", () => {
 app.use(cors());
 
 app.get("/getStream", async (req: Request, res: Response) => {
+  const docClient = new AWS.DynamoDB.DocumentClient({
+    region: "ap-northeast-2",
+  });
   const items = (await docClient.scan({ TableName: "Streamer" }).promise())
     .Items;
   items?.forEach((item) => {
