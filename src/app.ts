@@ -26,16 +26,12 @@ app.listen(port, "0.0.0.0", () => {
 app.use(cors());
 
 app.get("/getStream", async (req: Request, res: Response) => {
-  try {
-    const items = (await docClient.scan({ TableName: "Streamer" }).promise())
-      .Items;
-    items?.forEach((item) => {
-      streamers.set(item.user_name, item);
-    });
-    res.send(streamers);
-  } catch (err) {
-    console.log(err);
-  }
+  const items = (await docClient.scan({ TableName: "Streamer" }).promise())
+    .Items;
+  items?.forEach((item) => {
+    streamers.set(item.user_name, item);
+  });
+  res.send(JSON.stringify(streamers));
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
@@ -79,16 +75,16 @@ app.get("/report", (req: Request, res: Response) => {
 app.get("/change", async (req: Request, res: Response) => {
   const message = req.query.message as string;
 
-  res.write(
+  res.send(
     `${headerParams.get("clientId")} / ${headerParams.get("accessToken")}`
   );
-  res.send(
+  /*res.send(
     await getTwitchUsers(
       message,
       headerParams.get("clientId") as string,
       headerParams.get("accessToken") as string
     )
-  );
+  );*/
 });
 
 app.get("/sse", (req: Request, res: Response) => {
