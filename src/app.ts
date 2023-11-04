@@ -1,8 +1,8 @@
 import express, { Request, Response } from "express";
 import { getClientIp } from "request-ip";
 import cors from "cors";
-import { docClient, twitchAuth } from "../src/aws";
-import { getTwitchUsers } from "../src/api";
+import { docClient, setStreamer, twitchAuth } from "../src/aws";
+import { getTwitchUser } from "../src/api";
 
 //#region Server initial
 const app = express();
@@ -34,48 +34,22 @@ app.get("/getStream", async (req: Request, res: Response) => {
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
-  /*const message = req.query.message as string;
-  if (!streamers.has(message)) {
+  const login = req.query.login as string;
+
+  if (!streamers.has(login)) {
     // Search users in twitch
+    const user = (
+      await getTwitchUser(
+        login,
+        headerParams.get("clientId") as string,
+        headerParams.get("accessToken") as string
+      )
+    ).data.data[0];
 
-    // Update on "Streamers" DynamoDB
-    let updateExpression = "SET ";
-    const expressionAttributeKeys: { [key: string]: string } = {};
-    const expressionAttributeValues: { [key: string]: any } = {};
-
-    const attributes = {};
-
-    // attributes 객체키를 배열로 나열하고 이를 순회
-    Object.keys(attributes).forEach((key, index) => {
-      const placeholder = `#attr${index}`;
-      updateExpression += `${placeholder} = :value${index}, `;
-      expressionAttributeKeys[placeholder] = key;
-      expressionAttributeValues[`:value${index}`] = attributes[key];
-    });
-
-    const params = {
-      TableName: "Streamer",
-      Key: {
-        streamer_id: message,
-      },
-      UpdateExpression: updateExpression.slice(0, -2),
-      ExpressionAttributeNames: expressionAttributeKeys,
-      ExpressionAttributeValues: expressionAttributeValues,
-    };
-
-    docClient.update(params);
-  }*/
-});
-
-app.get("/change", async (req: Request, res: Response) => {
-  const message = req.query.message as string;
-
-  const temp = await getTwitchUsers(
-    message,
-    headerParams.get("clientId") as string,
-    headerParams.get("accessToken") as string
-  );
-  console.log(temp.data.data);
+    if (!user) return res.end();
+    console.log(user);
+    setStreamer(user);
+  }
   res.end();
 });
 
