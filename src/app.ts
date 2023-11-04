@@ -34,7 +34,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
-  res.send(headerParams.get("clientId"));
+  res.send(headerParams.get("accessToken"));
   /*const message = req.query.message as string;
   if (!streamers.has(message)) {
     // Search users in twitch
