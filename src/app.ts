@@ -64,20 +64,21 @@ app.get("/putStream", async (req: Request, res: Response) => {
 
   if (!streamers.has(login)) {
     // Search users in twitch
-    const user = (
-      await getTwitchUser(
-        login,
-        headerParams.get("clientId") as string,
-        headerParams.get("accessToken") as string
-      )
-    ).data.data[0];
-
-    if (!user)
+    try {
+      const user = (
+        await getTwitchUser(
+          login,
+          headerParams.get("clientId") as string,
+          headerParams.get("accessToken") as string
+        )
+      ).data.data[0];
+      console.log(user);
+      setStreamer(user);
+    } catch (err) {
       return res
         .status(400)
         .json(new Error("Error: 해당하는 유저를 찾을수 없습니다."));
-    console.log(user);
-    setStreamer(user);
+    }
 
     // Search req ip and add "streamer_id" on wishlist
     const ip = getClientIp(req) as string;
@@ -88,16 +89,16 @@ app.get("/putStream", async (req: Request, res: Response) => {
 
 app.get("/sse", (req: Request, res: Response) => {
   const ip = getClientIp(req) ?? "not-found";
-  const clientList = req.params.list.split(",");
+  console.log(`🖐 Client connected ${ip}`);
+
+  const list = (req.query.list as string) || "";
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  console.log(`🖐 Client connected ${ip}`);
-
   if (!clients.has(ip)) {
-    clients.set(ip, { wishList: clientList ?? [], res });
+    clients.set(ip, { wishList: list[0] === "" ? [] : list.split(","), res });
     console.log(clients);
 
     req.on("close", () => {
