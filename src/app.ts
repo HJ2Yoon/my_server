@@ -20,6 +20,16 @@ twitchAuth().then(({ auth, token }) => {
 app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
+
+docClient
+  .scan({ TableName: "Streamer" })
+  .promise()
+  .then((res) => {
+    const items = res.Items as Streamer[];
+    items?.forEach((item) => {
+      streamers.set(item.user_name, item);
+    });
+  });
 //#endregion
 
 // Type of stream data
@@ -42,9 +52,15 @@ setInterval(async () => {
     // Compare preData(before 1min) event trigger
     const preData = streamers.get(item.streamer_id);
     // 방송(type) change event
-    if (preData?.type !== item.type) sendEvent(item);
+    if (preData?.type !== item.type) {
+      console.log(preData?.type, item.type);
+      sendEvent(item);
+    }
     // 제목(title) change event
-    if (preData?.title !== item.title) sendEvent(item);
+    if (preData?.title !== item.title) {
+      console.log(preData?.title, item.title);
+      sendEvent(item);
+    }
     // curData update
     streamers.set(item.user_name, item);
   });
