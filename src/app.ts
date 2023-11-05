@@ -99,7 +99,7 @@ app.get("/sse", (req: Request, res: Response) => {
 
   if (!clients.has(ip)) {
     clients.set(ip, { wishList: list[0] === "" ? [] : list.split(","), res });
-    console.log(clients);
+    console.log(clients.get(ip)?.wishList);
 
     req.on("close", () => {
       clients.delete(ip);
@@ -115,9 +115,9 @@ app.get("/sse", (req: Request, res: Response) => {
 
 app.get("/report", (req: Request, res: Response) => {
   res.send(
-    `Current clients: ${clients.size}\n
-    ${JSON.stringify(Object.fromEntries(clients))}\n
-    ${JSON.stringify(Object.fromEntries(streamers))}`
+    `Current clients: ${clients.size}${JSON.stringify(
+      Object.fromEntries(streamers)
+    )}`
   );
 });
 
