@@ -87,16 +87,17 @@ app.get("/putStream", async (req: Request, res: Response) => {
 });
 
 app.get("/sse", (req: Request, res: Response) => {
+  const ip = getClientIp(req) ?? "not-found";
   const clientList = req.params.list.split(",");
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
-  const ip = getClientIp(req) ?? "not-found";
+  console.log(`🖐 Client connected ${ip}`);
+
   if (!clients.has(ip)) {
-    clients.set(ip, { wishList: clientList, res });
-    console.log(`🖐 Client connected ${ip}`);
+    clients.set(ip, { wishList: clientList ?? [], res });
     console.log(clients);
 
     req.on("close", () => {
