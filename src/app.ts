@@ -59,6 +59,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
   const login = req.query.login as string;
 
   if (!streamers.has(login)) {
@@ -71,16 +72,18 @@ app.get("/putStream", async (req: Request, res: Response) => {
       )
     ).data.data[0];
 
-    if (!user) return res.end();
+    if (!user)
+      return res
+        .status(400)
+        .json(new Error("Error: 해당하는 유저를 찾을수 없습니다."));
     console.log(user);
     setStreamer(user);
 
     // Search req ip and add "streamer_id" on wishlist
-    const ip = getClientIp(req);
-    if (!ip) return res.end();
+    const ip = getClientIp(req) as string;
     clients.get(ip)?.wishList.push(login);
   }
-  res.end();
+  res.status(200).end();
 });
 
 app.get("/sse", (req: Request, res: Response) => {
@@ -110,9 +113,9 @@ app.get("/sse", (req: Request, res: Response) => {
 
 app.get("/report", (req: Request, res: Response) => {
   res.send(
-    `Current clients: ${clients.size}\n\n\n${JSON.stringify(
-      Object.fromEntries(streamers)
-    )}`
+    `Current clients: ${clients.size}\n
+    ${JSON.stringify(Object.fromEntries(clients))}\n
+    ${JSON.stringify(Object.fromEntries(streamers))}`
   );
 });
 
