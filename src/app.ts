@@ -109,7 +109,11 @@ app.get("/sse", (req: Request, res: Response) => {
 });
 
 app.get("/report", (req: Request, res: Response) => {
-  res.send(`Current clients: ${clients.size}\n\n\n${streamers}`);
+  res.send(
+    `Current clients: ${clients.size}\n\n\n${JSON.stringify(
+      Object.fromEntries(streamers)
+    )}`
+  );
 });
 
 const sendEvent = (data: Streamer) => {
