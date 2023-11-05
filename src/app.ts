@@ -41,15 +41,18 @@ setInterval(async () => {
   items?.forEach((item) => {
     // Compare preData(before 1min) event trigger
     const preData = streamers.get(item.streamer_id);
-    // 방송(type) change event
-    if (preData?.type !== item.type) {
-      console.log(preData?.type, item.type);
-      sendEvent(item);
-    }
-    // 제목(title) change event
-    if (preData?.title !== item.title) {
-      console.log(preData?.title, item.title);
-      sendEvent(item);
+
+    if (preData) {
+      // 방송(type) change event
+      if (preData.type !== item.type) {
+        console.log(preData?.type, item.type);
+        sendEvent(item);
+      }
+      // 제목(title) change event
+      if (preData.title !== item.title) {
+        console.log(preData?.title, item.title);
+        sendEvent(item);
+      }
     }
     // curData update
     streamers.set(item.streamer_id, item);
@@ -70,21 +73,20 @@ app.get("/putStream", async (req: Request, res: Response) => {
 
   if (!streamers.has(login)) {
     // Search users in twitch
-    try {
-      const user = (
-        await getTwitchUser(
-          login,
-          headerParams.get("clientId") as string,
-          headerParams.get("accessToken") as string
-        )
-      ).data.data[0];
-      console.log(user);
-      setStreamer(user);
-    } catch (err) {
+    const user = (
+      await getTwitchUser(
+        login,
+        headerParams.get("clientId") as string,
+        headerParams.get("accessToken") as string
+      )
+    ).data.data[0];
+    console.log(user);
+    if (!user)
       return res
         .status(400)
         .json(new Error("Error: 해당하는 유저를 찾을수 없습니다."));
-    }
+
+    setStreamer(user);
   }
   // Search req ip and add "streamer_id" on wishlist
   const ip = getClientIp(req) as string;
