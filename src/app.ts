@@ -20,16 +20,6 @@ twitchAuth().then(({ auth, token }) => {
 app.listen(port, "0.0.0.0", () => {
   console.log(`Example app listening at http://localhost:${port}`);
 });
-
-docClient
-  .scan({ TableName: "Streamer" })
-  .promise()
-  .then((res) => {
-    const items = res.Items as Streamer[];
-    items?.forEach((item) => {
-      streamers.set(item.user_name, item);
-    });
-  });
 //#endregion
 
 // Type of stream data
@@ -62,7 +52,7 @@ setInterval(async () => {
       sendEvent(item);
     }
     // curData update
-    streamers.set(item.user_name, item);
+    streamers.set(item.streamer_id, item);
   });
 }, 60 * 1000);
 
@@ -95,11 +85,10 @@ app.get("/putStream", async (req: Request, res: Response) => {
         .status(400)
         .json(new Error("Error: 해당하는 유저를 찾을수 없습니다."));
     }
-
-    // Search req ip and add "streamer_id" on wishlist
-    const ip = getClientIp(req) as string;
-    clients.get(ip)?.wishList.push(login);
   }
+  // Search req ip and add "streamer_id" on wishlist
+  const ip = getClientIp(req) as string;
+  clients.get(ip)?.wishList.push(login);
   res.status(200).end();
 });
 
