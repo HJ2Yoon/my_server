@@ -8,8 +8,8 @@ import { getTwitchUser } from "../src/api";
 const app = express();
 const port = 3000;
 
-const clients = new Map<string, Response>();
-const streamers = new Map<string, { [key: string]: string }>();
+const clients = new Map<string, { wishList: string[]; res: Response }>();
+const streamers = new Map<string, Streamer>();
 const headerParams = new Map<string, string>();
 
 twitchAuth().then(({ auth, token }) => {
@@ -22,15 +22,40 @@ app.listen(port, "0.0.0.0", () => {
 });
 //#endregion
 
-app.use(cors());
+// Type of stream data
+interface Streamer {
+  streamer_id: string;
+  id: string;
+  user_name: string;
+  title: string;
+  profile_image_url: string;
+  started_at: string;
+  type: string;
+  viewer_count: number;
+}
 
-app.get("/getStream", async (req: Request, res: Response) => {
+// Get stream data from DynaomoDB
+setInterval(async () => {
   const items = (await docClient.scan({ TableName: "Streamer" }).promise())
-    .Items;
+    .Items as Streamer[];
   items?.forEach((item) => {
+    // Compare preData(before 1min) event trigger
+    const preData = streamers.get(item.streamer_id);
+    // 방송(type) change event
+    if (preData?.type !== item.type) sendEvent(item);
+    // 제목(title) change event
+    if (preData?.title !== item.title) sendEvent(item);
+    // curData update
     streamers.set(item.user_name, item);
   });
-  res.send(items);
+}, 60 * 1000);
+
+app.use(cors());
+
+// Client intialize 할때 불러오기
+app.get("/getStream", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
+  res.json();
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
@@ -49,19 +74,27 @@ app.get("/putStream", async (req: Request, res: Response) => {
     if (!user) return res.end();
     console.log(user);
     setStreamer(user);
+
+    // Search req ip and add "streamer_id" on wishlist
+    const ip = getClientIp(req);
+    if (!ip) return res.end();
+    clients.get(ip)?.wishList.push(login);
   }
   res.end();
 });
 
 app.get("/sse", (req: Request, res: Response) => {
+  const clientList = req.params.list.split(",");
+
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
   const ip = getClientIp(req) ?? "not-found";
   if (!clients.has(ip)) {
-    clients.set(ip, res);
+    clients.set(ip, { wishList: clientList, res });
     console.log(`🖐 Client connected ${ip}`);
+    console.log(clients);
 
     req.on("close", () => {
       clients.delete(ip);
@@ -76,11 +109,13 @@ app.get("/sse", (req: Request, res: Response) => {
 });
 
 app.get("/report", (req: Request, res: Response) => {
-  res.send(`Current clients: ${clients.size}`);
+  res.send(`Current clients: ${clients.size}\n\n\n${streamers}`);
 });
 
-const sendEvent = (data: { [key: string]: string }) => {
+const sendEvent = (data: Streamer) => {
   clients.forEach((client) => {
-    client.write(`data: ${JSON.stringify(data)}\n\n`);
+    if (!client.wishList.find((element) => element === data.streamer_id))
+      return;
+    client.res.write(`data: ${JSON.stringify(data)}\n\n`);
   });
 };
