@@ -41,17 +41,15 @@ setInterval(async () => {
   items?.forEach((item) => {
     // Compare preData(before 1min) event trigger
     const preData = streamers.get(item.streamer_id);
-    console.log(preData, item);
 
     if (preData) {
-      // 방송(type) change event
-      console.log(preData?.type, item.type);
       if (preData.type !== item.type) {
+        // 방송(type) change event
+        console.log(preData?.type, item.type);
         sendEvent(item);
-      }
-      // 제목(title) change event
-      console.log(preData?.title, item.title);
-      if (preData.title !== item.title) {
+      } else if (preData.title !== item.title) {
+        // 제목(title) change event
+        console.log(preData?.title, item.title);
         sendEvent(item);
       }
     }
@@ -82,17 +80,13 @@ app.get("/putStream", async (req: Request, res: Response) => {
       )
     ).data.data[0];
     console.log(user);
-    if (!user)
-      return res
-        .status(400)
-        .json(new Error("Error: 해당하는 유저를 찾을수 없습니다."));
-
-    setStreamer(user);
+    if (!user) return res.status(406).end();
+    else setStreamer(user);
   }
   // Search req ip and add "streamer_id" on wishlist
   const ip = getClientIp(req) as string;
   clients.get(ip)?.wishList.push(login);
-  res.status(200).end();
+  res.status(200).json(streamers.get(login));
 });
 
 app.get("/sse", (req: Request, res: Response) => {
