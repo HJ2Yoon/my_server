@@ -41,16 +41,17 @@ setInterval(async () => {
   items?.forEach((item) => {
     // Compare preData(before 1min) event trigger
     const preData = streamers.get(item.streamer_id);
+    console.log(preData, item);
 
     if (preData) {
       // 방송(type) change event
+      console.log(preData?.type, item.type);
       if (preData.type !== item.type) {
-        console.log(preData?.type, item.type);
         sendEvent(item);
       }
       // 제목(title) change event
+      console.log(preData?.title, item.title);
       if (preData.title !== item.title) {
-        console.log(preData?.title, item.title);
         sendEvent(item);
       }
     }
@@ -98,14 +99,14 @@ app.get("/sse", (req: Request, res: Response) => {
   const ip = getClientIp(req) ?? "not-found";
   console.log(`🖐 Client connected ${ip}`);
 
-  const list = (req.query.list as string) || "";
+  const list = (req.query.list as string) ?? "";
 
   res.setHeader("Content-Type", "text/event-stream");
   res.setHeader("Cache-Control", "no-cache");
   res.setHeader("Connection", "keep-alive");
 
   if (!clients.has(ip)) {
-    clients.set(ip, { wishList: list[0] === "" ? [] : list.split(","), res });
+    clients.set(ip, { wishList: list === "" ? [] : list.split(","), res });
     console.log(clients.get(ip)?.wishList);
 
     req.on("close", () => {
