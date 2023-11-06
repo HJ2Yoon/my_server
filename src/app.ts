@@ -114,7 +114,7 @@ app.get("/sse", (req: Request, res: Response) => {
   if (!clients.has(ip)) {
     clients.set(ip, { wishList: list === "" ? [] : list.split(","), res });
     console.log(clients.get(ip)?.wishList);
-    res.write("data: connected\n\n");
+    res.write("event: connected\ndata: connected\n\n");
 
     req.on("close", () => {
       clients.delete(ip);
