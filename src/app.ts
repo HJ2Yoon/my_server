@@ -68,7 +68,6 @@ app.get("/getStream", async (req: Request, res: Response) => {
   const wishList = req.query.list as string;
   res.status(200).json(
     wishList.split(",").map((element) => {
-      console.log(element, streamers.get(element));
       return streamers.get(element);
     })
   );
