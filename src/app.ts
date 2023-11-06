@@ -65,6 +65,11 @@ app.get("/getStream", async (req: Request, res: Response) => {
   res.setHeader("Content-Type", "application/json");
 
   const wishList = req.query.list as string;
+  console.log(
+    wishList.split(",").map((element) => {
+      return streamers.get(element);
+    })
+  );
   res.status(200).json(
     wishList.split(",").map((element) => {
       return streamers.get(element);
