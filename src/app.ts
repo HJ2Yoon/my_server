@@ -9,7 +9,7 @@ const app = express();
 const port = 3000;
 
 const clients = new Map<string, { wishList: string[]; res: Response }>();
-const streamers = new Map<string, Streamer>();
+const streamers = new Map<string, StreamData>();
 const headerParams = new Map<string, string>();
 
 twitchAuth().then(({ auth, token }) => {
@@ -23,21 +23,21 @@ app.listen(port, "0.0.0.0", () => {
 //#endregion
 
 // Type of stream data
-interface Streamer {
+interface StreamData {
   streamer_id: string;
   id: string;
   user_name: string;
   title: string;
   profile_image_url: string;
   started_at: string;
-  type: string;
+  type: "live" | "off";
   viewer_count: number;
 }
 
 // Get stream data from DynaomoDB
 setInterval(async () => {
   const items = (await docClient.scan({ TableName: "Streamer" }).promise())
-    .Items as Streamer[];
+    .Items as StreamData[];
   items?.forEach((item) => {
     // Compare preData(before 1min) event trigger
     const preData = streamers.get(item.streamer_id);
@@ -63,7 +63,13 @@ app.use(cors());
 // Client intialize 할때 불러오기
 app.get("/getStream", async (req: Request, res: Response) => {
   res.setHeader("Content-Type", "application/json");
-  res.json();
+
+  const wishList = req.query.list as string;
+  res.status(200).json(
+    wishList.split(",").map((element) => {
+      return streamers.get(element);
+    })
+  );
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
@@ -123,7 +129,7 @@ app.get("/report", (req: Request, res: Response) => {
   );
 });
 
-const sendEvent = (data: Streamer) => {
+const sendEvent = (data: StreamData) => {
   clients.forEach((client) => {
     if (!client.wishList.find((element) => element === data.streamer_id))
       return;
