@@ -63,6 +63,8 @@ app.use(cors());
 
 // Client intialize 할때 불러오기
 app.get("/getStream", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
+
   const wishList = req.query.list as string;
   res.status(200).json(
     wishList.split(",").map((element) => {
@@ -72,6 +74,7 @@ app.get("/getStream", async (req: Request, res: Response) => {
 });
 
 app.get("/putStream", async (req: Request, res: Response) => {
+  res.setHeader("Content-Type", "application/json");
   const login = req.query.login as string;
 
   if (!streamers.has(login)) {
@@ -90,7 +93,7 @@ app.get("/putStream", async (req: Request, res: Response) => {
   // Search req ip and add "streamer_id" on wishlist
   const ip = getClientIp(req) as string;
   clients.get(ip)?.wishList.push(login);
-  return res.status(200).json(streamers.get(login));
+  res.status(200).json(streamers.get(login));
 });
 
 app.get("/sse", (req: Request, res: Response) => {
