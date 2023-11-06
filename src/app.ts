@@ -3,6 +3,7 @@ import { getClientIp } from "request-ip";
 import cors from "cors";
 import { docClient, setStreamer, twitchAuth } from "../src/aws";
 import { getTwitchUser } from "../src/api";
+import { write } from "fs";
 
 //#region Server initial
 const app = express();
@@ -113,6 +114,7 @@ app.get("/sse", (req: Request, res: Response) => {
   if (!clients.has(ip)) {
     clients.set(ip, { wishList: list === "" ? [] : list.split(","), res });
     console.log(clients.get(ip)?.wishList);
+    res.write("data: connected\n\n");
 
     req.on("close", () => {
       clients.delete(ip);
